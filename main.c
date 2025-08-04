@@ -5,7 +5,10 @@
 #include <sys/types.h>
 #include <pwd.h>
 #include <readline/history.h>
-#include <limits.h>                        //For HOST_NAME_MAX
+#include <limits.h>   
+
+
+#define PROMPT_MAX      512
 
 char* get_username() {
 
@@ -24,7 +27,7 @@ char* get_hostname(char* buf, size_t size) {
     if(gethostname(buf, sizeof(buf)) == 0) {
         return buf;
     } else{
-        perror("Error retrieving hostname\n");
+        perror("Error retrieving hostname");
     }
     return NULL;
 };
@@ -34,13 +37,22 @@ int main()
 {
 	int close = 1;
     char hostname[HOST_NAME_MAX + 1];  //Buffer to store hostname, +1 for null terminator
+
     char* host = get_hostname(hostname, sizeof(hostname));
     char* user = get_username();
+    char prompt[PROMPT_MAX];
 
-    printf("%s@%s>", user, host);
+    //TODO: Change tilda to current working directory
+    snprintf(prompt, sizeof(prompt), "%s@%s: ~$ ", user, host);
+ 
 	
-	while(!close) {
-		
+	while(close) {
+        char *input = readline(prompt);
+        printf("you input %s\n", input);
+	  //free readline to use again
+        free(input);
+        input = (char *)NULL;
 	}
+    //free prompt and related memory
 	return 0;
 }
